@@ -24,4 +24,6 @@ public class GlobalController {
         return  new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    
+
 }
