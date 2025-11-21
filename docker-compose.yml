@@ -1,0 +1,58 @@
+services:
+  database:
+    image: mysql:8.0
+    container_name: pra-database
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=pra-demo
+    ports:
+      - "3307:3306"
+    volumes:
+      - pra-volume:/var/lib/mysql
+    networks:
+      - pra-net
+    restart: unless-stopped
+  frontend:
+    image: client:lastest
+    build:
+      context: ./client
+      args:
+        API_HOST: localhost
+        API_PORT: 8081
+        API_BASE: /api
+      
+    container_name: pra-client
+    ports:
+      - "3000:80"
+    networks:
+      - 'pra-net'
+    restart: unless-stopped
+    depends_on:
+      - database
+  backend:
+    image: server:lastest
+    build:
+      context: ./server
+    container_name: pra-server
+    environment:
+      SERVER_PORT: 8080
+      DB_HOST: database
+      DB_PORT: 3306
+      DB_NAME: adj-demo
+      DB_USER: root
+      DB_PASS: root
+    ports:
+      - "8081:8080"
+    networks:
+      - 'pra-net'
+    restart: unless-stopped
+    depends_on:
+      - frontend
+
+volumes:
+  pra-volume:
+    external: true
+
+networks:
+  pra-net:
+    external: true
